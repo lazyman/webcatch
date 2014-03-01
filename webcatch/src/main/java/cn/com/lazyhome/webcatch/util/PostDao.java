@@ -40,6 +40,11 @@ public interface PostDao {
 	 */
 	List<Post> listAll();
 	/**
+	 * 获取未更新的post
+	 * @return
+	 */
+	List<Post> getUnUpdate();
+	/**
 	 * 根据URL地址取post
 	 * @param url
 	 * @return
@@ -62,5 +67,9 @@ public interface PostDao {
 	 * @return
 	 */
 	Post convertPostNode(TagNode node);
+	/**
+	 * 将错误信息记入数据库
+	 * @param post
+	 */
 	void recordErr(Post post);
 }

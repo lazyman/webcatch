@@ -170,7 +170,9 @@ public class PostDaoImp implements PostDao {
 		return post;
 	}
 	
-
+	/**
+	 * 通过xpath定位post，并将url和title取出，url可作为唯一主键，title主要用于显示
+	 */
 	public Post convertListNode(TagNode node) {
 		Post post = new Post();
 		
@@ -189,22 +191,15 @@ public class PostDaoImp implements PostDao {
 		return post;
 	}
 
+	/**
+	 * 通过xpath定位到post，再以正则表达式从内容（content）中取出数据
+	 */
 	public Post convertPostNode(TagNode node) {
 		Post post = new Post();
 		
-		String xpathContent;
-		String xpathUrl = "/div[@class=\"title\"]/h2/a/@href";
+		//通过xpath定位到post
 		String xpathTitle = "/div[@class=\"title\"]/h2/a";
-		String xpathYear;
-		String xpathStudio;
-		String xpathGenres;
-		String xpathFormat;
-		String xpathDuration;
-		String xpathVideo;
-		String xpathAudio;
-		String xpathFilesize;
 		
-		String xpathp = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]/div[@class=\"title\"]/h2/a";
 		try {
 			String content = node.getText().toString();
 			TagNode titleNode = (TagNode)node.evaluateXPath(xpathTitle)[0];
@@ -213,6 +208,7 @@ public class PostDaoImp implements PostDao {
 			post.setUrl(titleNode.getAttributeByName("href"));
 			post.setContent(content);
 			
+			//再以正则表达式从内容（content）中取出数据
 			//year
 			Pattern pattern = Pattern.compile("Release Year: (.+)");
 			Matcher matcher = pattern.matcher(content);
@@ -289,6 +285,24 @@ public class PostDaoImp implements PostDao {
 		} finally {
 			DBAccess.close(conn);
 		}
+	}
+
+	public List<Post> getUnUpdate() {
+		List<Post> posts = null;
+		Connection conn = null;
+		
+		try {
+			conn = DBAccess.getConnection();
+			QueryRunner runner = new QueryRunner();
+			posts = runner.query(conn, "select * from post where size is null", listHandler);
+			
+		} catch (SQLException e) {
+			logger.error("open conn", e);
+		} finally {
+			DBAccess.close(conn);
+		}
+		
+		return posts;
 	}
 
 }
