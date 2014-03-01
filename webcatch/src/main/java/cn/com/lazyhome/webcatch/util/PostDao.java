@@ -62,4 +62,5 @@ public interface PostDao {
 	 * @return
 	 */
 	Post convertPostNode(TagNode node);
+	void recordErr(Post post);
 }

@@ -50,6 +50,7 @@ public class Post {
 	 * ·ç¸ñ¡¢Ìâ²Ä
 	 */
 	private String genres;
+	private String err;
 
 	/**
 	 * @return 
@@ -143,5 +144,11 @@ public class Post {
 	}
 	public void setGenres(String genres) {
 		this.genres = genres;
+	}
+	public String getErr() {
+		return err;
+	}
+	public void setErr(String err) {
+		this.err = err;
 	}
 }

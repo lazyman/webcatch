@@ -70,7 +70,7 @@ public class PostDaoImp implements PostDao {
 
 	public void update(Post post) {
 		Connection conn = null;
-		String sql = "update post set title = ?, content=?, size=? where url=?";
+		String sql = "update post set title = ?, content=?, size=?, releaseyear =?, studio =?, format =?, duration =?, video =?, audio =?, genres =?, errmsg=null where url=?";
 		
 		if(post == null) {
 			throw new IllegalArgumentException("post is null");
@@ -78,10 +78,15 @@ public class PostDaoImp implements PostDao {
 		try {
 			conn = DBAccess.getConnection();
 			QueryRunner runner = new QueryRunner();
-			runner.update(conn, sql, post.getTitle(), post.getContent(), post.getSize(), post.getUrl());
+			runner.update(conn, sql, post.getTitle(), post.getContent(), post.getSize(), 
+					post.getReleaseYear(), post.getStudio(), post.getFormat(), post.getDuration(), 
+					post.getVideo(), post.getAudio(), post.getGenres(), post.getUrl());
 		} catch (SQLException e) {
+			post.setErr(e.getMessage());
+			recordErr(post);
+			
 			logger.debug(post);
-			logger.error("open conn", e);
+			logger.error("update post", e);
 		} finally {
 			DBAccess.close(conn);
 		}
@@ -216,36 +221,43 @@ public class PostDaoImp implements PostDao {
 			}
 			//studio
 			pattern = Pattern.compile("Studio: (.+)");
+			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setStudio(matcher.group(1));
 			}
 			//Genres
 			pattern = Pattern.compile("Genres: (.+)");
+			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setGenres(matcher.group(1));
 			}
 			//Format
 			pattern = Pattern.compile("Format: (.+)");
+			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setFormat(matcher.group(1));
 			}
 			//Duration
 			pattern = Pattern.compile("Duration: (.+)");
+			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setDuration(matcher.group(1));
 			}
 			//Video
 			pattern = Pattern.compile("Video: (.+)");
+			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setVideo(matcher.group(1));
 			}
 			//Audio
 			pattern = Pattern.compile("Audio: (.+)");
+			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setAudio(matcher.group(1));
 			}
 			//File size
 			pattern = Pattern.compile("File size: (.+)");
+			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setSize(matcher.group(1));
 			}
@@ -257,6 +269,26 @@ public class PostDaoImp implements PostDao {
 
 		
 		return post;
+	}
+
+	public void recordErr(Post post) {
+
+		Connection conn = null;
+		String sql = "update post set errmsg = ? where url=?";
+		
+		if(post == null) {
+			throw new IllegalArgumentException("post is null");
+		}
+		try {
+			conn = DBAccess.getConnection();
+			QueryRunner runner = new QueryRunner();
+			runner.update(conn, sql, post.getErr(), post.getUrl());
+		} catch (SQLException e) {
+			logger.debug(post.getErr());
+			logger.error("recordErr", e);
+		} finally {
+			DBAccess.close(conn);
+		}
 	}
 
 }
