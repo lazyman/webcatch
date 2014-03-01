@@ -25,7 +25,7 @@ public class DBAccess {
 	 */
 	public static Connection getConnection() throws SQLException {
 		//数据文件目录相对于启动目录
-		String sourceURL = "jdbc:h2:~/h2/mydb";// H2 database
+		String sourceURL = "jdbc:h2:tcp://localhost/~/h2/mydb";// H2 database
 		String user = "sa";
 		String password = "";
 		try {

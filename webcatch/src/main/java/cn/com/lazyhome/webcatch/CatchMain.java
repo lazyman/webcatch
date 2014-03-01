@@ -26,8 +26,8 @@ public class CatchMain {
 		String uri = "http://freebdsmsexvideos.net/category/all-bdsm/page/1";
 		uri = System.getProperty("user.dir") + "/src/test/resources/all-bdsm.htm";
 
-//		new CatchMain().analyseList(uri);
-//		new CatchMain().getlist();
+		new CatchMain().analyseList(uri);
+		new CatchMain().getlist();
 		
 		uri = System.getProperty("user.dir") + "/src/test/resources/post-detail.htm";
 		new CatchMain().analysePost(uri);
