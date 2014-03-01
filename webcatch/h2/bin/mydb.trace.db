@@ -1,0 +1,87 @@
+03-01 00:45:39 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "DELETE FROM MYTABLE WHERE SEX=/[*]'male/' "; expected "ALL, ANY, SOME, SELECT, FROM"; SQL statement:
+DELETE FROM mytable WHERE sex=/'male/' [42001-175]
+03-01 00:46:26 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "MYTABLE" already exists; SQL statement:
+CREATE TABLE mytable(name VARCHAR(100),sex VARCHAR(10)) [42101-175]
+03-01 13:53:38 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "POST" already exists; SQL statement:
+create table post(   title varchar(100) null,   url varchar(1000) null,   content varchar(4000),  size float) [42101-175]
+03-01 13:54:08 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "POST" already exists; SQL statement:
+create table post(   title varchar(100) null,   url varchar(1000) null,   content varchar(4000),  size float) [42101-175]
+03-01 13:56:21 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "POST" already exists; SQL statement:
+create table post(   title varchar(100) null,   url varchar(1000) null,   content varchar(4000),  size float) [42101-175]
+03-01 13:56:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "POST" already exists; SQL statement:
+create table post(   title varchar(100) null,   url varchar(1000) null,   content varchar(4000),  size float) [42101-175]
+03-01 13:57:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "POST" already exists; SQL statement:
+create table post(   title varchar(100) null,   url varchar(1000) null,   content varchar(4000),  size float) [42101-175]
+03-01 14:13:03 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:03 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:04 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:04 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:05 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:06 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:06 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:07 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:08 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:09 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:09 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:10 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:11 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:11 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:11 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:12 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:13 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:13 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:14 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 14:13:14 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSE[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuse(?, ?) [42001-175]
+03-01 15:01:28 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSES[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuses(?, ?) [42001-175]
+03-01 15:07:18 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "INSERT INTO POST(TITLE, URL) VALUSES[*](?, ?) "; expected "DIRECT, SORTED, DEFAULT, VALUES, SET, (, SELECT, FROM"; SQL statement:
+insert into post(title, url) valuses(?, ?) [42001-175]
