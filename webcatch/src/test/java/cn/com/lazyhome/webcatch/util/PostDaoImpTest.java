@@ -76,7 +76,7 @@ public class PostDaoImpTest {
 
 	@Test
 	public void testInsertAndGet() {
-		Post post = dao.convert(postNd);
+		Post post = dao.convertListNode(postNd);
 		
 		//insert to db
 		int beforeCount = dao.count();
@@ -102,7 +102,7 @@ public class PostDaoImpTest {
 
 	@Test
 	public void testConvert() {
-		Post p = dao.convert(postNd);
+		Post p = dao.convertListNode(postNd);
 		
 		assertEquals("title", p.getTitle(), title);
 		assertEquals("url", p.getUrl(), url);

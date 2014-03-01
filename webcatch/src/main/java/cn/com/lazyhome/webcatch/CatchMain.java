@@ -23,11 +23,14 @@ public class CatchMain {
 	private static final Log logger = LogFactory.getLog(CatchMain.class);
 
 	public static void main(String[] args) {
-		String uri = "http://freebdsmsexvideos.net/category/all-bdsm/";
-		uri = System.getProperty("user.dir") + "/src/test/resources/view-source freebdsmsexvideos.net category all-bdsm.htm";
+		String uri = "http://freebdsmsexvideos.net/category/all-bdsm/page/1";
+		uri = System.getProperty("user.dir") + "/src/test/resources/all-bdsm.htm";
 
-		new CatchMain().analyseList(uri);
-		new CatchMain().getlist();
+//		new CatchMain().analyseList(uri);
+//		new CatchMain().getlist();
+		
+		uri = System.getProperty("user.dir") + "/src/test/resources/post-detail.htm";
+		new CatchMain().analysePost(uri);
 	}
 	
 	void getlist() {
@@ -74,7 +77,7 @@ public class CatchMain {
 					logger.debug(i);
 //					TagNode info = (TagNode) postNd.evaluateXPath(xpathp)[0];
 					
-					Post post = dao.convert(postNd);
+					Post post = dao.convertListNode(postNd);
 					logger.debug(post);
 					dao.save(post);
 //				} else {
@@ -96,6 +99,34 @@ public class CatchMain {
 		return null;
 	}
 	
+	private Post analysePost(String uri) {
+		try {
+			String xpathNode = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]";
+			
+
+			logger.info(uri);
+			HtmlCleaner cleaner = new HtmlCleaner();
+			TagNode node = cleaner.clean(new File(uri));
+
+			PostDao dao = new PostDaoImp();
+			node = (TagNode)node.evaluateXPath(xpathNode)[0];
+			
+			Post post = dao.convertPostNode(node);
+			
+			System.out.println(post.getContent());
+			System.out.println(post);
+		} catch (MalformedURLException e) {
+			logger.warn("url error", e);
+		} catch (IOException e) {
+			logger.warn("io error", e);
+		} catch (XPatherException e) {
+			logger.warn("xpath error", e);
+		}  finally {
+
+		}
+
+		return null;
+	}
 
 	private List<Post> analysexml(String uri) {
 		Vector<Post> posts = new Vector<Post>();

@@ -50,5 +50,16 @@ public interface PostDao {
 	 * @return
 	 */
 	int count();
-	Post convert(TagNode node);
+	/**
+	 * 分析列表中的节点信息
+	 * @param node
+	 * @return
+	 */
+	Post convertListNode(TagNode node);
+	/**
+	 * 分析节点的详细信息
+	 * @param node
+	 * @return
+	 */
+	Post convertPostNode(TagNode node);
 }

@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -164,7 +166,7 @@ public class PostDaoImp implements PostDao {
 	}
 	
 
-	public Post convert(TagNode node) {
+	public Post convertListNode(TagNode node) {
 		Post post = new Post();
 		
 		String xpathp = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]/div[@class=\"title\"]/h2/a";
@@ -173,6 +175,81 @@ public class PostDaoImp implements PostDao {
 			
 			post.setTitle(info.getText().toString());
 			post.setUrl(info.getAttributeByName("href"));
+			
+		} catch (XPatherException e) {
+			logger.warn("convert html node to post bean", e);
+		}
+
+		
+		return post;
+	}
+
+	public Post convertPostNode(TagNode node) {
+		Post post = new Post();
+		
+		String xpathContent;
+		String xpathUrl = "/div[@class=\"title\"]/h2/a/@href";
+		String xpathTitle = "/div[@class=\"title\"]/h2/a";
+		String xpathYear;
+		String xpathStudio;
+		String xpathGenres;
+		String xpathFormat;
+		String xpathDuration;
+		String xpathVideo;
+		String xpathAudio;
+		String xpathFilesize;
+		
+		String xpathp = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]/div[@class=\"title\"]/h2/a";
+		try {
+			String content = node.getText().toString();
+			TagNode titleNode = (TagNode)node.evaluateXPath(xpathTitle)[0];
+			
+			post.setTitle(titleNode.getText().toString());
+			post.setUrl(titleNode.getAttributeByName("href"));
+			post.setContent(content);
+			
+			//year
+			Pattern pattern = Pattern.compile("Release Year: (.+)");
+			Matcher matcher = pattern.matcher(content);
+			if(matcher.find()) {
+				post.setReleaseYear(matcher.group(1));
+			}
+			//studio
+			pattern = Pattern.compile("Studio: (.+)");
+			if(matcher.find()) {
+				post.setStudio(matcher.group(1));
+			}
+			//Genres
+			pattern = Pattern.compile("Genres: (.+)");
+			if(matcher.find()) {
+				post.setGenres(matcher.group(1));
+			}
+			//Format
+			pattern = Pattern.compile("Format: (.+)");
+			if(matcher.find()) {
+				post.setFormat(matcher.group(1));
+			}
+			//Duration
+			pattern = Pattern.compile("Duration: (.+)");
+			if(matcher.find()) {
+				post.setDuration(matcher.group(1));
+			}
+			//Video
+			pattern = Pattern.compile("Video: (.+)");
+			if(matcher.find()) {
+				post.setVideo(matcher.group(1));
+			}
+			//Audio
+			pattern = Pattern.compile("Audio: (.+)");
+			if(matcher.find()) {
+				post.setAudio(matcher.group(1));
+			}
+			//File size
+			pattern = Pattern.compile("File size: (.+)");
+			if(matcher.find()) {
+				post.setSize(matcher.group(1));
+			}
+			
 			
 		} catch (XPatherException e) {
 			logger.warn("convert html node to post bean", e);

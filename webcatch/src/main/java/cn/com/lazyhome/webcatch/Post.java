@@ -21,7 +21,35 @@ public class Post {
 	/**
 	 * 文件大小
 	 */
-	private float size;
+	private String size;
+	/**
+	 * 出品年份
+	 */
+	private String releaseYear;
+	/**
+	 * 工作室
+	 */
+	private String studio;
+	/**
+	 * 格式：mp4
+	 */
+	private String format;
+	/**
+	 * 长度
+	 */
+	private String duration;
+	/**
+	 * 视频参数
+	 */
+	private String video;
+	/**
+	 * 音频参数
+	 */
+	private String audio;
+	/**
+	 * 风格、题材
+	 */
+	private String genres;
 
 	/**
 	 * @return 
@@ -68,10 +96,52 @@ public class Post {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public float getSize() {
+	public String getSize() {
 		return size;
 	}
-	public void setSize(float size) {
+	public void setSize(String size) {
 		this.size = size;
+	}
+	public String getReleaseYear() {
+		return releaseYear;
+	}
+	public void setReleaseYear(String releaseYear) {
+		this.releaseYear = releaseYear;
+	}
+	public String getStudio() {
+		return studio;
+	}
+	public void setStudio(String studio) {
+		this.studio = studio;
+	}
+	public String getFormat() {
+		return format;
+	}
+	public void setFormat(String format) {
+		this.format = format;
+	}
+	public String getDuration() {
+		return duration;
+	}
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
+	public String getVideo() {
+		return video;
+	}
+	public void setVideo(String video) {
+		this.video = video;
+	}
+	public String getAudio() {
+		return audio;
+	}
+	public void setAudio(String audio) {
+		this.audio = audio;
+	}
+	public String getGenres() {
+		return genres;
+	}
+	public void setGenres(String genres) {
+		this.genres = genres;
 	}
 }
