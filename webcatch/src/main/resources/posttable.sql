@@ -18,3 +18,4 @@ create table post(
 alter table post alter column errmsg text;
 
 alter table post alter column genres varchar(300);
+alter table post alter column title varchar(300);

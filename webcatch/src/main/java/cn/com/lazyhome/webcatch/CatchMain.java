@@ -43,11 +43,37 @@ public class CatchMain {
 	}
 
 	/**
-	 * 
-	 * @param url
-	 *            http://freebdsmsexvideos.net/category/all-bdsm
+	 * 启动程序
 	 */
-	private List<Post> analyseList(String uri) {
+	private void start() {
+		//取列表线程
+		analyse(1, 10);
+		
+		// 取详细信息线程
+		analysePost();
+	}
+	/**
+	 * 循环分析列表
+	 * @param start
+	 * @param end
+	 */
+	private void analyse(int start, int end) {
+		String baseurl = "http://freebdsmsexvideos.net/category/all-bdsm/page/";
+		int i;
+		String url;
+		
+		for(i=start; i<=end; i++) {
+			url = baseurl + i;
+			analyseList(url);
+		}
+	}
+	/**
+	 * 从指定URL解析页面，将页面中各个post的url和title存入数据库
+	 * @param url
+	 *            http://freebdsmsexvideos.net/category/all-bdsm/page/1
+	 *            http://freebdsmsexvideos.net/category/all-bdsm/page/32
+	 */
+	public List<Post> analyseList(String uri) {
 		Vector<Post> posts = new Vector<Post>();
 		try {
 			String xpathposts = "//*[@id=\"post-230831\"]/div/div/div[1]/h2/a";
@@ -62,10 +88,8 @@ public class CatchMain {
 
 			logger.info(uri);
 			HtmlCleaner cleaner = new HtmlCleaner();
-			TagNode node = cleaner.clean(new File(uri));
-			
-//			URL url = new URL(uri);
-//			TagNode node = cleaner.clean(new URL(uri));
+//			TagNode node = cleaner.clean(new File(uri));
+			TagNode node = cleaner.clean(new URL(uri));
 
 			TagNode[] nodes = ((TagNode)node.evaluateXPath(xpathposts)[0]).getChildTags();
 			String postname;
@@ -102,9 +126,12 @@ public class CatchMain {
 		return null;
 	}
 	
+	/**
+	 * 从数据库取出信息部完整的数据进行更新
+	 */
 	private void analysePost() {
 		PostDao dao = new PostDaoImp();
-		List<Post> posts = dao.listAll();
+		List<Post> posts = dao.getUnUpdate();
 		
 		Iterator<Post> iter = posts.iterator();
 		while(iter.hasNext()) {
@@ -113,7 +140,12 @@ public class CatchMain {
 		}
 	}
 	
-	private Post analysePost(String uri) {
+	/**
+	 * 根据uri解析该页面的信息，最终更新数据库中的数据
+	 * @param uri
+	 * @return
+	 */
+	public Post analysePost(String uri) {
 		PostDao dao = new PostDaoImp();
 		
 		try {
