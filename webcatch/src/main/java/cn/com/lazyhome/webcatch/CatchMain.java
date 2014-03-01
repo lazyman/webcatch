@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -29,8 +30,10 @@ public class CatchMain {
 //		new CatchMain().analyseList(uri);
 //		new CatchMain().getlist();
 		
-		uri = System.getProperty("user.dir") + "/src/test/resources/post-detail.htm";
-		new CatchMain().analysePost(uri);
+//		uri = System.getProperty("user.dir") + "/src/test/resources/post-detail.htm";
+		
+//		new CatchMain().analysePost(uri);
+		new CatchMain().analysePost();
 	}
 	
 	void getlist() {
@@ -99,16 +102,28 @@ public class CatchMain {
 		return null;
 	}
 	
+	private void analysePost() {
+		PostDao dao = new PostDaoImp();
+		List<Post> posts = dao.listAll();
+		
+		Iterator<Post> iter = posts.iterator();
+		while(iter.hasNext()) {
+			Post p = iter.next();
+			analysePost(p.getUrl());
+		}
+	}
+	
 	private Post analysePost(String uri) {
+		PostDao dao = new PostDaoImp();
+		
 		try {
 			String xpathNode = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]";
 			
 
 			logger.info(uri);
 			HtmlCleaner cleaner = new HtmlCleaner();
-			TagNode node = cleaner.clean(new File(uri));
+			TagNode node = cleaner.clean(new URL(uri));
 
-			PostDao dao = new PostDaoImp();
 			node = (TagNode)node.evaluateXPath(xpathNode)[0];
 			
 			Post post = dao.convertPostNode(node);
