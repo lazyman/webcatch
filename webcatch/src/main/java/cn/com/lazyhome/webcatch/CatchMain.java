@@ -26,14 +26,15 @@ public class CatchMain {
 	public static void main(String[] args) {
 		String uri = "http://freebdsmsexvideos.net/category/all-bdsm/page/1";
 		uri = System.getProperty("user.dir") + "/src/test/resources/all-bdsm.htm";
+		uri = System.getProperty("user.dir") + "/src/test/resources/all-bdsm-with-category.htm";
 
-//		new CatchMain().analyseList(uri);
+		new CatchMain().analyseList(uri);
 //		new CatchMain().getlist();
 		
 //		uri = System.getProperty("user.dir") + "/src/test/resources/post-detail.htm";
 		
 //		new CatchMain().analysePost(uri);
-		new CatchMain().analysePost();
+//		new CatchMain().analysePost();
 	}
 	
 	void getlist() {

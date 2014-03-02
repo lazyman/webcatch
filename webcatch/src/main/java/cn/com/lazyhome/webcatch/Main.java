@@ -20,8 +20,8 @@ public class Main {
 		ExecutorService pool = Executors.newFixedThreadPool(20);
 //		pool = Executors.newCachedThreadPool();
 		
-		int start=1547;
-		int end = 2581 ;
+		int start=1;
+		int end = 1;
 		final String baseurl = "http://freebdsmsexvideos.net/category/all-bdsm/page/";
 		
 		//循环分析列表

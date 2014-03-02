@@ -8,8 +8,6 @@ import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import cn.com.lazyhome.webcatch.CatchMain;
-
 /**
  * 数据库常用操作
  * @author rainbow
@@ -44,5 +42,9 @@ public class DBAccess {
 		} catch (SQLException e) {
 			logger.error("close conn", e);
 		}
+	}
+	
+	public static void execute(String sql) {
+		
 	}
 }

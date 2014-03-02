@@ -17,13 +17,14 @@ import org.apache.commons.logging.LogFactory;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
 
-import cn.com.lazyhome.webcatch.CatchMain;
+import cn.com.lazyhome.webcatch.CateMap;
 import cn.com.lazyhome.webcatch.Post;
 
 public class PostDaoImp implements PostDao {
 	private static ResultSetHandler<Post> handler = new BeanHandler<Post>(Post.class);
 	private static ResultSetHandler<List<Post>> listHandler = new BeanListHandler<Post>(Post.class);
-	private static final Log logger = LogFactory.getLog(CatchMain.class);
+	private static final Log logger = LogFactory.getLog(PostDaoImp.class);
+	private static CateMapDao cateMapDao = new CateMapDaoImp();
 
 	public static void main(String[] args) {
 		PostDao dao = new PostDaoImp();
@@ -31,6 +32,7 @@ public class PostDaoImp implements PostDao {
 		System.out.println(dao.count());
 		logger.debug(dao.get(""));
 	}
+
 
 	public void init() {
 //		String droptable = "drop table post";
@@ -60,6 +62,12 @@ public class PostDaoImp implements PostDao {
 			conn = DBAccess.getConnection();
 			QueryRunner runner = new QueryRunner();
 			runner.update(conn, sql, post.getTitle(), post.getUrl());
+			
+			//insert category
+			for(CateMap cat : post.getCates()) {
+				cat.setPosturl(post.getUrl());
+				cateMapDao.save(cat);
+			}
 		} catch (SQLException e) {
 			logger.debug(post);
 			logger.error("open conn", e);
@@ -81,6 +89,12 @@ public class PostDaoImp implements PostDao {
 			runner.update(conn, sql, post.getTitle(), post.getContent(), post.getSize(), 
 					post.getReleaseYear(), post.getStudio(), post.getFormat(), post.getDuration(), 
 					post.getVideo(), post.getAudio(), post.getGenres(), post.getUrl());
+			
+			//insert category
+			for(CateMap cat : post.getCates()) {
+				cat.setPosturl(post.getUrl());
+				cateMapDao.save(cat);
+			}
 		} catch (SQLException e) {
 			post.setErr(e.getMessage());
 			recordErr(post);
@@ -94,20 +108,8 @@ public class PostDaoImp implements PostDao {
 
 	public void save(Post post) {
 		Post p = get(post.getUrl());
-		boolean insert = false;
 		
 		if(p == null) {
-			insert = true;
-		} else {
-			p.setUrl(post.getUrl());
-			p.setTitle(post.getTitle());
-		}
-
-		save(p, insert);
-	}
-
-	public void save(Post post, boolean insert) {
-		if(insert) {
 			insert(post);
 		} else {
 			update(post);
@@ -180,12 +182,18 @@ public class PostDaoImp implements PostDao {
 		Post post = new Post();
 		
 		String xpathp = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]/div[@class=\"title\"]/h2/a";
+		String xpathTag = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]/div[@class=\"tags\"]/div[@class=\"categories\"]";
 		try {
 			TagNode info = (TagNode) node.evaluateXPath(xpathp)[0];
-			
+
 			post.setTitle(info.getText().toString());
 			post.setUrl(info.getAttributeByName("href"));
+
 			
+			List<TagNode> cateNodes = ((TagNode)node.evaluateXPath(xpathTag)[0]).getChildTagList();
+			
+			List<CateMap> cates = cateMapDao.convertTags(cateNodes);
+			post.setCates(cates);
 		} catch (XPatherException e) {
 			logger.warn("convert html node to post bean", e);
 		}
@@ -193,6 +201,7 @@ public class PostDaoImp implements PostDao {
 		
 		return post;
 	}
+
 
 	/**
 	 * 通过xpath定位到post，再以正则表达式从内容（content）中取出数据
@@ -202,6 +211,7 @@ public class PostDaoImp implements PostDao {
 		
 		//通过xpath定位到post
 		String xpathTitle = "/div[@class=\"title\"]/h2/a";
+		String xpathTag = "//div[@class=\"categories\"]";
 		
 		try {
 			String content = node.getText().toString();
@@ -210,6 +220,11 @@ public class PostDaoImp implements PostDao {
 			post.setTitle(titleNode.getText().toString());
 			post.setUrl(titleNode.getAttributeByName("href"));
 			post.setContent(content);
+			
+			List<TagNode> cateNodes = ((TagNode)node.evaluateXPath(xpathTag)[0]).getChildTagList();
+			
+			List<CateMap> cates = cateMapDao.convertTags(cateNodes);
+			post.setCates(cates);
 			
 			//再以正则表达式从内容（content）中取出数据
 			//year

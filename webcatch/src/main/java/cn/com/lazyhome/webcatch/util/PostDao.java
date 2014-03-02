@@ -24,12 +24,6 @@ public interface PostDao {
 	 */
 	void save(Post post);
 	/**
-	 * 根据标志判断插入或修改数据
-	 * @param post 数据内容
-	 * @param insert true: 插入数据, false: 修改数据
-	 */
-	void save(Post post, boolean insert);
-	/**
 	 * 初始化表结构
 	 */
 	void init();

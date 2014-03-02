@@ -13,7 +13,8 @@ public class AnalysePostThread implements Runnable {
 	}
 	
 	public void run() {
-		logger.info(Thread.currentThread().getName() + uri + "is started.");
+//		logger.info(Thread.currentThread().getName() + uri + "is started.");
+		logger.info(uri + "is started.");
 		
 		catchTool.analysePost(uri);
 	}

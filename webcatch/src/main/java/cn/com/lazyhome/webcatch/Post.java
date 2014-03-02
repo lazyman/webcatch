@@ -1,5 +1,7 @@
 package cn.com.lazyhome.webcatch;
 
+import java.util.List;
+
 /**
  * 博客
  * @author rainbow
@@ -50,7 +52,12 @@ public class Post {
 	 * 风格、题材
 	 */
 	private String genres;
+	/**
+	 * 错误消息
+	 */
 	private String err;
+	
+	private List<CateMap> cates;
 
 	/**
 	 * @return 
@@ -150,5 +157,11 @@ public class Post {
 	}
 	public void setErr(String err) {
 		this.err = err;
+	}
+	public List<CateMap> getCates() {
+		return cates;
+	}
+	public void setCates(List<CateMap> cates) {
+		this.cates = cates;
 	}
 }
