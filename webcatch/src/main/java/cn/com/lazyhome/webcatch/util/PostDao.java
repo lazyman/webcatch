@@ -19,9 +19,8 @@ public interface PostDao {
 	 */
 	void update(Post post);
 	/**
-	 * 自动判断插入或修改数据
+	 * 自动判断插入或修改数据，当有重复数据时，只更新url和title
 	 * @param post
-	 * @param insert
 	 */
 	void save(Post post);
 	/**

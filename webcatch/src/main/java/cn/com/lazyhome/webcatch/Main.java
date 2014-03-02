@@ -17,10 +17,11 @@ public class Main {
 	 * 以线程池的方式启动任务
 	 */
 	private void poolStart() {
-		ExecutorService pool = Executors.newFixedThreadPool(5);
+		ExecutorService pool = Executors.newFixedThreadPool(20);
+//		pool = Executors.newCachedThreadPool();
 		
-		int start=10;
-		int end = 2577 ;
+		int start=1547;
+		int end = 2581 ;
 		final String baseurl = "http://freebdsmsexvideos.net/category/all-bdsm/page/";
 		
 		//循环分析列表
@@ -32,7 +33,7 @@ public class Main {
 		}
 		
 		
-		boolean running = false;
+		boolean running = true;
 		while(running) {
 			//取详细信息线程
 			PostDao dao = new PostDaoImp();

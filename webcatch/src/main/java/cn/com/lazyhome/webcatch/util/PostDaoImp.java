@@ -98,9 +98,12 @@ public class PostDaoImp implements PostDao {
 		
 		if(p == null) {
 			insert = true;
+		} else {
+			p.setUrl(post.getUrl());
+			p.setTitle(post.getTitle());
 		}
 
-		save(post, insert);
+		save(p, insert);
 	}
 
 	public void save(Post post, boolean insert) {

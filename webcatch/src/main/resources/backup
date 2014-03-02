@@ -1,0 +1,1 @@
+ java -cp h2*.jar org.h2.tools.Script -url "jdbc:h2:~/h2/mydb" -user "sa" -script "~/backup.sql" 
