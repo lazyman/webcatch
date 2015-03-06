@@ -149,6 +149,8 @@ public class CatchMain {
 	public Post analysePost(String uri) {
 		PostDao dao = new PostDaoImp();
 		
+		Post post = new Post();
+		post.setUrl(uri);
 		try {
 			String xpathNode = "//div[@class=\"post_top\"]/div[@class=\"post_bttm\"]";
 			
@@ -159,7 +161,7 @@ public class CatchMain {
 
 			node = (TagNode)node.evaluateXPath(xpathNode)[0];
 			
-			Post post = dao.convertPostNode(node);
+			post = dao.convertPostNode(node);
 			dao.update(post);
 			
 //			System.out.println(post.getContent());
@@ -168,6 +170,13 @@ public class CatchMain {
 			logger.warn("url error", e);
 		} catch (IOException e) {
 			logger.warn("io error", e);
+			
+			post.setErr(e.getMessage());
+			post.setSize("0");
+			post.setCates(new Vector<CateMap>());
+			
+			dao.update(post);
+			dao.recordErr(post);
 		} catch (XPatherException e) {
 			logger.warn("xpath error", e);
 		}  finally {

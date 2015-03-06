@@ -21,7 +21,7 @@ public class Main {
 //		pool = Executors.newCachedThreadPool();
 		
 		int start=1;
-		int end = 1;
+		int end = 3;
 		final String baseurl = "http://freebdsmsexvideos.net/category/all-bdsm/page/";
 		
 		//循环分析列表

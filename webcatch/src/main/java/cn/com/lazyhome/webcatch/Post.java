@@ -25,6 +25,14 @@ public class Post {
 	 */
 	private String size;
 	/**
+	 * 文件大小--纯数字
+	 */
+	private float filesize;
+	/**
+	 * 文件单位
+	 */
+	private String unit;
+	/**
 	 * 出品年份
 	 */
 	private String releaseYear;
@@ -163,5 +171,17 @@ public class Post {
 	}
 	public void setCates(List<CateMap> cates) {
 		this.cates = cates;
+	}
+	public float getFilesize() {
+		return filesize;
+	}
+	public void setFilesize(float filesize) {
+		this.filesize = filesize;
+	}
+	public String getUnit() {
+		return unit;
+	}
+	public void setUnit(String unit) {
+		this.unit = unit;
 	}
 }

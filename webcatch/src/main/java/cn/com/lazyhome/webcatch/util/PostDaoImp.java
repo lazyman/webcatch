@@ -78,7 +78,8 @@ public class PostDaoImp implements PostDao {
 
 	public void update(Post post) {
 		Connection conn = null;
-		String sql = "update post set title = ?, content=?, size=?, releaseyear =?, studio =?, format =?, duration =?, video =?, audio =?, genres =?, errmsg=null where url=?";
+		String sql = "update post set title = ?, content=?, size=?, releaseyear =?, studio =?, format =?, "
+				+ " duration =?, video =?, audio =?, genres =?, errmsg=null, filesize=?, unit=? where url=?";
 		
 		if(post == null) {
 			throw new IllegalArgumentException("post is null");
@@ -88,7 +89,7 @@ public class PostDaoImp implements PostDao {
 			QueryRunner runner = new QueryRunner();
 			runner.update(conn, sql, post.getTitle(), post.getContent(), post.getSize(), 
 					post.getReleaseYear(), post.getStudio(), post.getFormat(), post.getDuration(), 
-					post.getVideo(), post.getAudio(), post.getGenres(), post.getUrl());
+					post.getVideo(), post.getAudio(), post.getGenres(), post.getFilesize(), post.getUnit(), post.getUrl());
 			
 			//insert category
 			for(CateMap cat : post.getCates()) {
@@ -228,7 +229,7 @@ public class PostDaoImp implements PostDao {
 			
 			//再以正则表达式从内容（content）中取出数据
 			//year
-			Pattern pattern = Pattern.compile("Release Year: (.+)");
+			Pattern pattern = Pattern.compile("Release Year: (\\d+)");
 			Matcher matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setReleaseYear(matcher.group(1));
@@ -240,7 +241,7 @@ public class PostDaoImp implements PostDao {
 				post.setStudio(matcher.group(1));
 			}
 			//Genres
-			pattern = Pattern.compile("Genres: (.+)");
+			pattern = Pattern.compile("Genres: (.+)\\s+\\w+:");
 			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setGenres(matcher.group(1));
@@ -252,7 +253,7 @@ public class PostDaoImp implements PostDao {
 				post.setFormat(matcher.group(1));
 			}
 			//Duration
-			pattern = Pattern.compile("Duration: (.+)");
+			pattern = Pattern.compile("\\w+:\\s*([\\d+:]\\d+:\\d+)\\s+");
 			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setDuration(matcher.group(1));
@@ -270,10 +271,21 @@ public class PostDaoImp implements PostDao {
 				post.setAudio(matcher.group(1));
 			}
 			//File size
-			pattern = Pattern.compile("File size: (.+)");
+			pattern = Pattern.compile("File size:\\s+([\\d\\.]+\\s[M|G]B)");
 			matcher = pattern.matcher(content);
 			if(matcher.find()) {
 				post.setSize(matcher.group(1));
+				//200mb 77gb 99.43 mb
+				pattern = Pattern.compile("([\\d\\.]+)\\s(\\w+)");
+				matcher = pattern.matcher(post.getSize());
+				if(matcher.find()) {
+					String filesize = matcher.group(1);
+					String unit = matcher.group(2);
+					post.setUnit(unit);
+					post.setFilesize(Float.parseFloat(filesize));
+				}
+			} else {
+				post.setSize("null");
 			}
 			
 			
