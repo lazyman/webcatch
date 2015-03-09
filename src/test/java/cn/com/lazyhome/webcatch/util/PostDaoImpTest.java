@@ -37,7 +37,7 @@ public class PostDaoImpTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String uri = System.getProperty("user.dir") + "/src/test/resources/view-source freebdsmsexvideos.net category all-bdsm.htm";
+		String uri = System.getProperty("user.dir") + "/src/test/resources/all-bdsm.htm";
 
 		System.out.println(uri);
 		
