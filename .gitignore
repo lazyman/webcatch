@@ -5,4 +5,7 @@
 .settings
 .project
 .classpath
+detail.log
+error.log
+downloadedFile
 
