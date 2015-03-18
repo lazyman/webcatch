@@ -10,7 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * æ•°æ®åº“å·¥å…·ç±»
+ * Êı¾İ¿â¹¤¾ßÀà
  * @author dch
  *
  */
@@ -18,21 +18,21 @@ public class DBUtil {
 	private static Log logger = LogFactory.getLog(DBUtil.class);
 	private static DBUtil util;
 	
-	// æ•°æ®åº“è¿æ¥ä¿¡æ¯
+	// Êı¾İ¿âÁ¬½ÓĞÅÏ¢
 	/**
-	 * æ•°æ®åº“é©±åŠ¨
+	 * Êı¾İ¿âÇı¶¯
 	 */
 	private String driver;
 	/**
-	 * æ•°æ®åº“URL
+	 * Êı¾İ¿âURL
 	 */
 	private String url;
 	/**
-	 * æ•°æ®åº“ç”¨æˆ·å
+	 * Êı¾İ¿âÓÃ»§Ãû
 	 */
 	private String username;
 	/**
-	 * æ•°æ®åº“å¯†ç 
+	 * Êı¾İ¿âÃÜÂë
 	 */
 	private String password;
 
@@ -55,7 +55,7 @@ public class DBUtil {
 		
 		try {
 			util.getConnection().close();
-			logger.info("è¿æ¥æ•°æ®åº“æˆåŠŸ.....");
+			logger.info("Á¬½ÓÊı¾İ¿â³É¹¦.....");
 		} catch (SQLException e) {
 			logger.error("DBUtil.getInstance SQLException", e);
 			
@@ -66,7 +66,7 @@ public class DBUtil {
 	}
 	
 	/**
-	 * è·å–æ•°æ®åº“è¿æ¥
+	 * »ñÈ¡Êı¾İ¿âÁ¬½Ó
 	 * @return
 	 * @throws SQLException
 	 */
@@ -74,7 +74,7 @@ public class DBUtil {
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e) {
-			logger.warn("è½½å…¥æ•°æ®åº“é©±åŠ¨å¤±è´¥", e);
+			logger.warn("ÔØÈëÊı¾İ¿âÇı¶¯Ê§°Ü", e);
 			util = null;
 		}
 		Connection connection = DriverManager.getConnection(url, username, password);
@@ -83,9 +83,9 @@ public class DBUtil {
 	}
 	
 	/**
-	 * å…³é—­æ•°æ®åº“è¿æ¥
-	 * @param conn æ•°æ®åº“è¿æ¥
-	 * @param prestmt SQLè¯­å¥
+	 * ¹Ø±ÕÊı¾İ¿âÁ¬½Ó
+	 * @param conn Êı¾İ¿âÁ¬½Ó
+	 * @param prestmt SQLÓï¾ä
 	 */
 	public void closeConnection(Connection conn, PreparedStatement prestmt) {
 		try {
@@ -97,15 +97,15 @@ public class DBUtil {
 				conn.close();
 			}
 		} catch (Exception e) {
-			// å«æ•°æ®åº“å¼‚å¸¸å’ŒNullPointå¼‚å¸¸
-			logger.error("å…³é—­è¿æ¥é”™è¯¯", e);
+			// º¬Êı¾İ¿âÒì³£ºÍNullPointÒì³£
+			logger.error("¹Ø±ÕÁ¬½Ó´íÎó", e);
 		}
 	}
 	
 	/**
-	 * æ‰§è¡Œsqlï¼Œåªèƒ½ä¼ å…¥stringå‚æ•°ï¼Œä¸é™ä¸ªæ•°
-	 * @param sql è¦æ‰§è¡Œçš„sqlè¯­å¥
-	 * @param params å‚æ•°åˆ—è¡¨ï¼Œç±»å‹ä¸ºstringï¼Œä¸é™ä¸ªæ•°
+	 * Ö´ĞĞsql£¬Ö»ÄÜ´«Èëstring²ÎÊı£¬²»ÏŞ¸öÊı
+	 * @param sql ÒªÖ´ĞĞµÄsqlÓï¾ä
+	 * @param params ²ÎÊıÁĞ±í£¬ÀàĞÍÎªstring£¬²»ÏŞ¸öÊı
 	 * @throws SQLException 
 	 */
 	public void executeByStrParams(Connection conn, String sql, List<String> params) throws SQLException {
