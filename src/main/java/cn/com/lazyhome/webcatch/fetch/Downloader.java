@@ -5,6 +5,8 @@ package cn.com.lazyhome.webcatch.fetch;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * 下载模块
@@ -21,13 +23,15 @@ public interface Downloader {
 	 * @param parent 上级地址
 	 * @param url 下载地址
 	 */
-	void downPage(URL parent, URL url);
+	HashMap<String, UrlPage> downPage(URL parent, URL url);
 	/**
 	 * parent-上级地址，url-下载地址，level-层级，默认3（本页面一级，图片资源页一级，展开大图一级）
 	 * @param parent 上级地址
 	 * @param url 下载地址
 	 * @param level 层级，默认3（本页面一级，图片资源页一级，展开大图一级）
+	 * @return 
 	 */
-	void downPage(URL parent, URL url, int level);
-	void downPage(String parent, String url) throws MalformedURLException;
+	HashMap<String, UrlPage> downPage(URL parent, URL url, int level);
+	HashMap<String, UrlPage> downPage(String parent, String url) throws MalformedURLException;
+	void setPool(ExecutorService pool);
 }

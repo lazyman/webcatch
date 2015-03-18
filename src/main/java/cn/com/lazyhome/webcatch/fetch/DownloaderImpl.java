@@ -8,12 +8,12 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +21,9 @@ import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
 
+import cn.com.lazyhome.webcatch.fetch.dao.DownloadDao;
+import cn.com.lazyhome.webcatch.fetch.dao.DownloadDaoImpl;
+import cn.com.lazyhome.webcatch.fetch.util.DBUtil;
 import cn.com.lazyhome.webcatch.fetch.util.ParamUtil;
 
 /**
@@ -32,6 +35,7 @@ import cn.com.lazyhome.webcatch.fetch.util.ParamUtil;
  */
 public class DownloaderImpl implements Downloader {
 	private static final Log logger = LogFactory.getLog(DownloaderImpl.class);
+	private ExecutorService pool;// = Executors.newFixedThreadPool(5);
 	
 	/**
 	 * 没有指定文件名时，给予的默认文件名
@@ -45,22 +49,27 @@ public class DownloaderImpl implements Downloader {
 	public static String localDir;
 	private String baseDir;
 
-	public void downPage(URL parent, URL url) {
+	public HashMap<String, UrlPage> downPage(URL parent, URL url) {
 		logger.debug("begin downPage(String parent, String url)");
 		// TODO 下载网页
 		String level = config.getProperty("app.downloader.level");
 		int lev = Integer.parseInt(level);
 
-		downPage(parent, url, lev);
+		return downPage(parent, url, lev);
 	}
 
-	public void downPage(URL parent, URL url, int level) {
+	public HashMap<String, UrlPage> downPage(URL parent, final URL url, final int level) {
 		if(logger.isDebugEnabled()) {
 			logger.debug("begin downPage(String parent, String url, int level)");
 			logger.debug(parent);
 			logger.debug(url);
 			logger.debug(level);
 		}
+		
+		
+		// 开启多线程下载模式
+		ExecutorService pool = Executors.newFixedThreadPool(3);
+		
 		// TODO 下载网页
 		Vector<String> resourceXPaths = new Vector<String>();
 		// 超链接 <a href="http://freebdsmsexvideos.net/"><img
@@ -97,19 +106,24 @@ public class DownloaderImpl implements Downloader {
 			}
 			
 			saveUrlFile(url, localFile);
+			// 标记已下载
+			fetched(url);
 			
 			// 如果没有更多的下载层级要求，则不再下载，退出循环
 			if(level <= 0) {
-				return;
+				return null;
 			}
 
+			// 标记为开始分析网页内容，解析出更多需要的URL
+			analyzing(url);
+			
 			// 2. 处理页面，提取需要下载的链接资源，把没主机的补上。
 			HtmlCleaner cleaner = new HtmlCleaner();
 			TagNode html = cleaner.clean(localFile);
 
 //			List<String> resources = new Vector<String>();
 			// 使用map保证url不重复
-			HashMap<String, URL> resources = new HashMap<String, URL>();
+			HashMap<String, UrlPage> res = new HashMap<String, UrlPage>();
 			
 			for(String path : resourceXPaths) {
 				logger.info("使用" + path + "解析URL");
@@ -117,16 +131,32 @@ public class DownloaderImpl implements Downloader {
 				
 				for(int i=0; i < objs.length; i++) {
 					String key = objs[i].toString();
-					if(resources.containsKey(key)) {
+					if(res.containsKey(key)) {
 						continue;
 					} else {
-						URL value;
+						final URL u;
 						try {
-							value = new URL(key);
-							resources.put(key, value);
+							u = new URL(key);
+							UrlPage value = new UrlPage();
+							value.setParent(url);
+							value.setUrl(u);
+							value.setStatus(UrlPage.STATUS_NEW);
+							value.setLevel(level - 1);
+							
+							res.put(key, value);
 							
 							// 3. 递归下载新页面
-							downPage(url, value, level-1);
+//							pool.execute(new Runnable() {
+//								
+//								public void run() {
+//									logger.trace("Type1426641219818.run start...");
+//									
+//									downPage(url, value, level-1);
+//									
+//									logger.trace("Type1426641219818.run end.");
+//								}
+//							});
+							
 						} catch (MalformedURLException e) {
 							// 出现不合法URL，自动跳过
 							logger.debug("下载模块解析页面URL时,出现不合法URL自动跳过" + key, e);
@@ -139,26 +169,63 @@ public class DownloaderImpl implements Downloader {
 //				resources.removeAll(list);
 //				resources.addAll(list);
 				
+				// 标记为已分析完成
+				analyzed(url);
+				
+				return res;
 			}
 
 			// 3. 递归下载新页面
 //			downPage(url, url, level);
 
 		} catch (XPatherException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
 			logger.error("DownloaderImpl.downPage XPatherException", e);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			// e1.printStackTrace();
 			logger.error("DownloaderImpl.downPage IOException", e1);
 		}
-	}
-
-	private Collection<? extends String> analyzeAHref(Object[] objs) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
+
+	/**
+	 * 标记为已分析完成
+	 * @param url 
+	 */
+	private void analyzed(URL url) {
+		logger.trace("DownloaderImpl.analyzed start...");
+		
+		DownloadDao dao = new DownloadDaoImpl();
+		dao.analyzed(url);
+		
+		logger.trace("DownloaderImpl.analyzed end.");
+	}
+
+	/**
+	 * 标记为开始分析网页内容，解析出更多需要的URL
+	 * @param url
+	 */
+	private void analyzing(URL url) {
+		logger.trace("DownloaderImpl.analyzing start...");
+		
+		DownloadDao dao = new DownloadDaoImpl();
+		dao.analyzing(url);
+		
+		logger.trace("DownloaderImpl.analyzing end.");
+	}
+
+	/**
+	 * 标记已下载
+	 * @param url 
+	 */
+	private void fetched(URL url) {
+		logger.trace("DownloaderImpl.fetched start...");
+		
+		DownloadDao dao = new DownloadDaoImpl();
+		dao.fetched(url);
+		
+		logger.trace("DownloaderImpl.fetched end.");
+	}
+	
 
 	// 获取网络文件，转存到fileDes中，fileDes需要带文件后缀名
 	public void saveUrlFile(URL url, File fileDes) throws IOException {
@@ -201,7 +268,7 @@ public class DownloaderImpl implements Downloader {
 	 * 初始化系统参数
 	 */
 	public void initParam() {
-		// TODO 初始化参数
+		// 初始化参数
 		ParamUtil param = new ParamUtil();
 		config = param.loadParam();
 		String paramDir = config.getProperty("app.downloader.localDir");
@@ -223,15 +290,32 @@ public class DownloaderImpl implements Downloader {
 				logger.warn("无法获取本地暂存目录：\t" + localDir);
 			}
 		}
+		
+		
+		// 数据库相关参数
+//		String dbpassword = config.getProperty("config.db.password");
+//		String dbusername = config.getProperty("config.db.username");
+//		String dburl = config.getProperty("config.db.url");
+//		String dbdriver = config.getProperty("config.db.driverClass");
+//		
+//		DBUtil.getInstance(dbdriver, dburl, dbusername, dbpassword);
 	}
 
-	public void downPage(String parent, String url) throws MalformedURLException {
+	public HashMap<String, UrlPage> downPage(String parent, String url) throws MalformedURLException {
 		logger.trace("Downloader.downPage start...");
 		
 		// TODO Auto-generated method stub
-		downPage(new URL(parent), new URL(url));
+		return downPage(new URL(parent), new URL(url));
 		
-		logger.trace("Downloader.downPage end.");
+//		logger.trace("Downloader.downPage end.");
+	}
+
+	public ExecutorService getPool() {
+		return pool;
+	}
+
+	public void setPool(ExecutorService pool) {
+		this.pool = pool;
 	}
 
 }

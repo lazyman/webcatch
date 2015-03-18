@@ -51,6 +51,16 @@ public class DBUtil {
 		util.setDriver(dbdriver);
 		util.setUrl(dburl);
 		util.setUsername(dbusername);
+		util.setPassword(dbpassword);
+		
+		try {
+			util.getConnection().close();
+			logger.info("连接数据库成功.....");
+		} catch (SQLException e) {
+			logger.error("DBUtil.getInstance SQLException", e);
+			
+			util = null;
+		}
 		
 		return util;
 	}

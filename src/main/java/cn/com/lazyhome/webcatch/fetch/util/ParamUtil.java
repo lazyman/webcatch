@@ -34,6 +34,8 @@ public class ParamUtil {
 			
 			config.load(this.getClass().getResourceAsStream( CONFIG_FILE ));
 			
+			getParam();
+			
 			logger.trace(config);
 		} catch (IOException e) {
 			logger.error("º”‘ÿ≈‰÷√≤Œ ˝ ß∞‹", e);

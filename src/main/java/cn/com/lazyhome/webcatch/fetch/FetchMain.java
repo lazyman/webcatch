@@ -4,9 +4,16 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import cn.com.lazyhome.webcatch.fetch.dao.DownloadDao;
+import cn.com.lazyhome.webcatch.fetch.dao.DownloadDaoImpl;
 
 
 /**
@@ -20,7 +27,8 @@ public class FetchMain {
 	
 	public static void main(String[] args) {
 //		demo();
-		start(args);
+//		start(args);
+		downloading();
 	}
 	
 	public static void start(String[] args) {
@@ -29,13 +37,60 @@ public class FetchMain {
 		String parent = "http://freebdsmsexvideos.net/category/all-bdsm/page/1";
 		
 		downloader.initParam();
+
 		try {
+			// TODO 在数据库中将需要的记录标记为正在下载，并加载到resource中，线程池并发执行下载任务
+//			downloading();
+			
 			downloader.downPage(parent, url);
+			
 		} catch (MalformedURLException e) {
 			logger.error("FetchMain.start MalformedURLException", e);
 		}
 	}
-	
+	/**
+	 * 在数据库中将需要的记录标记为正在下载，并加载到resource中，线程池并发执行下载任务
+	 */
+	private static void downloading() {
+		// TODO 在数据库中将需要的记录标记为正在下载，并加载到resource中，线程池并发执行下载任务
+		logger.trace("FetchMain.downloading start...");
+		
+		final Downloader downloader = new DownloaderImpl();
+		downloader.initParam();
+		final DownloadDao dao = new DownloadDaoImpl();
+
+		ExecutorService pool = Executors.newFixedThreadPool(5);
+
+		// 在数据库中将需要下载的记录标记为正在下载，并加载到profiles中
+		List<UrlPage> profiles = dao.loadDownloaderProfile();
+		
+		do {
+			
+			// 线程池并发执行下载任务
+			for(final UrlPage p : profiles) {
+				pool.execute(new Runnable() {
+					
+					public void run() {
+						logger.trace("Type1426664271330.run start...");
+						
+						HashMap<String, UrlPage> resources = downloader.downPage(p.getParent(), p.getUrl(), p.getLevel());
+						
+						// 更新 resource 到数据库
+						// update profile set status = ? where url=? and level
+						dao.analyzed(resources);
+						
+						logger.trace("Type1426664271330.run end.");
+					}
+				});
+			}
+			
+			profiles = null;
+			
+		} while(profiles.size() > 0);
+		
+		logger.trace("FetchMain.downloading end.");
+	}
+
 	private static void demo() {
 		logger.trace("FetchMain.demo start...");
 
