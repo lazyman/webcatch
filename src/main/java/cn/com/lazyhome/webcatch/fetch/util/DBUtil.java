@@ -150,5 +150,11 @@ public class DBUtil {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	public void executeByStrParams(String sql, List<String> params) throws SQLException {
+		// TODO Auto-generated method stub
+		Connection conn = getConnection();
+		
+		executeByStrParams(conn, sql, params);
+	}
 
 }
