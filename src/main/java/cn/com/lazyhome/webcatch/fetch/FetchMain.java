@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -50,8 +51,9 @@ public class FetchMain {
 	}
 	/**
 	 * 在数据库中将需要的记录标记为正在下载，并加载到resource中，线程池并发执行下载任务
+	 * @throws SQLException 
 	 */
-	private static void downloading() {
+	private static void downloading() throws SQLException {
 		// TODO 在数据库中将需要的记录标记为正在下载，并加载到resource中，线程池并发执行下载任务
 		logger.trace("FetchMain.downloading start...");
 		
@@ -77,14 +79,18 @@ public class FetchMain {
 						
 						// 更新 resource 到数据库
 						// update profile set status = ? where url=? and level
-						dao.analyzed(resources);
+						try {
+							dao.analyzed(resources);
+						} catch (SQLException e) {
+							logger.trace(e.getMessage(), e);
+						}
 						
 						logger.trace("Type1426664271330.run end.");
 					}
 				});
 			}
 			
-			profiles = null;
+			profiles = dao.loadDownloaderProfile();
 			
 		} while(profiles.size() > 0);
 		
