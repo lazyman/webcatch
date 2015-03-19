@@ -3,8 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.com.lazyhome.webcatch</groupId>
 	<artifactId>webcatch</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 
+	<build>
+		<defaultGoal>dependency:go-offline</defaultGoal>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>
