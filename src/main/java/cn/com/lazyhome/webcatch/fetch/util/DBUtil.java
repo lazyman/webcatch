@@ -3,11 +3,20 @@ package cn.com.lazyhome.webcatch.fetch.util;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.h2.jdbcx.JdbcConnectionPool;
+
+import cn.com.lazyhome.webcatch.fetch.UrlPage;
 
 /**
  * 数据库工具类
@@ -77,7 +86,9 @@ public class DBUtil {
 			logger.warn("载入数据库驱动失败", e);
 			util = null;
 		}
-		Connection connection = DriverManager.getConnection(url, username, password);
+//		Connection connection = DriverManager.getConnection(url, username, password);
+		JdbcConnectionPool cp = JdbcConnectionPool.create(url,username,password);
+		Connection connection = cp.getConnection();
 		
 		return connection;
 	}
@@ -111,8 +122,8 @@ public class DBUtil {
 	public void executeByStrParams(Connection conn, String sql, List<String> params) throws SQLException {
 		PreparedStatement prestmt = conn.prepareStatement(sql);
 		int size = params.size();
-		for(int parameterIndex=1; parameterIndex< size; parameterIndex++) {
-			prestmt.setString(parameterIndex, params.get(parameterIndex));
+		for(int parameterIndex=0; parameterIndex< size; parameterIndex++) {
+			prestmt.setString(parameterIndex+1, params.get(parameterIndex));
 		}
 		prestmt.execute();
 		
@@ -155,6 +166,56 @@ public class DBUtil {
 		Connection conn = getConnection();
 		
 		executeByStrParams(conn, sql, params);
+	}
+	
+	public Object[] queryByStrParams(String sql, String... params) throws SQLException {
+		Connection conn = getConnection();
+		
+		ResultSetHandler<Object[]> handler = new ResultSetHandler<Object[]>() {
+		    public Object[] handle(ResultSet rs) throws SQLException {
+		        if (!rs.next()) {
+		            return null;
+		        }
+		    
+		        ResultSetMetaData meta = rs.getMetaData();
+		        int cols = meta.getColumnCount();
+		        Object[] result = new Object[cols];
+
+		        for (int i = 0; i < cols; i++) {
+		            result[i] = rs.getString(i + 1);
+		        }
+
+		        return result;
+		    }
+		};
+		
+		QueryRunner run = new QueryRunner();
+		try{
+			Object[] result = run.query(conn, sql, handler, params);
+		        // do something with the result
+		        
+		    return result;
+		} finally {
+		    conn.close(); 
+		}
+		
+	}
+	
+
+	public List<UrlPage> queryBeanByStrParams(String sql, String... params) throws SQLException {
+		Connection conn = getConnection();
+		
+		ResultSetHandler<List<UrlPage>> handler = new BeanListHandler<UrlPage>(UrlPage.class);
+		
+		QueryRunner run = new QueryRunner();
+		try{
+			List<UrlPage> pages = run.query(conn, sql, handler, params);
+
+		    return pages;
+		} finally {
+		    conn.close(); 
+		}
+		
 	}
 
 }

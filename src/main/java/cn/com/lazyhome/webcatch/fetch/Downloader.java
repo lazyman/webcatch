@@ -32,6 +32,7 @@ public interface Downloader {
 	 * @return 
 	 */
 	HashMap<String, UrlPage> downPage(URL parent, URL url, int level);
-	HashMap<String, UrlPage> downPage(String parent, String url) throws MalformedURLException;
+	HashMap<String, UrlPage> downPage(String parent, String url);
 	void setPool(ExecutorService pool);
+	HashMap<String, UrlPage> downPage(String refer, String url, int level);
 }

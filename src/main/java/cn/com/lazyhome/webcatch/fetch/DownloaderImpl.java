@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Vector;
@@ -23,7 +23,6 @@ import org.htmlcleaner.XPatherException;
 
 import cn.com.lazyhome.webcatch.fetch.dao.DownloadDao;
 import cn.com.lazyhome.webcatch.fetch.dao.DownloadDaoImpl;
-import cn.com.lazyhome.webcatch.fetch.util.DBUtil;
 import cn.com.lazyhome.webcatch.fetch.util.ParamUtil;
 
 /**
@@ -96,18 +95,18 @@ public class DownloaderImpl implements Downloader {
 		// 本模块只负责下载，是否已存在由调用程序确认
 		try {
 			String filename = File.separator + url.getHost() + url.getPath();
+			
 			File localFile;
 			
 			//检查path是否带有文件名
-			if(filename.lastIndexOf('/') > 0) {
-				localFile = new File(localDir + filename, DEFAULT_FILE_NAME);
-			} else {
-				localFile = new File(localDir, filename);
+			if(filename.endsWith("/")) {
+				filename = filename + DEFAULT_FILE_NAME;
 			}
+			localFile = new File(localDir, filename);
 			
 			saveUrlFile(url, localFile);
 			// 标记已下载
-			fetched(url);
+			markFetched(url);
 			
 			// 如果没有更多的下载层级要求，则不再下载，退出循环
 			if(level <= 0) {
@@ -115,7 +114,7 @@ public class DownloaderImpl implements Downloader {
 			}
 
 			// 标记为开始分析网页内容，解析出更多需要的URL
-			analyzing(url);
+			markAnalyzing(url);
 			
 			// 2. 处理页面，提取需要下载的链接资源，把没主机的补上。
 			HtmlCleaner cleaner = new HtmlCleaner();
@@ -125,25 +124,46 @@ public class DownloaderImpl implements Downloader {
 			// 使用map保证url不重复
 			HashMap<String, UrlPage> res = new HashMap<String, UrlPage>();
 			
+			int urlCount=0;
+			int skipUrl=0;
+			int sumUrl=0;
 			for(String path : resourceXPaths) {
+				skipUrl = 0;
+				urlCount = 0;
 				logger.info("使用" + path + "解析URL");
 				Object[] objs = html.evaluateXPath(path);
 				
 				for(int i=0; i < objs.length; i++) {
-					String key = objs[i].toString();
+					String analyzedUrl = objs[i].toString();
+					logger.trace(analyzedUrl);
+					urlCount++;
+					
+					URL u = null;
+					try {
+						u = new URL(url, analyzedUrl);
+					} catch (MalformedURLException e) {
+						// 出现不合法URL，自动跳过
+						logger.debug("下载模块解析页面URL时,出现不合法URL自动跳过【" + analyzedUrl + "】");
+						continue;
+					}
+					
+					String key = u.getHost() + u.getPath();
 					if(res.containsKey(key)) {
+						logger.trace("skip:" + analyzedUrl);
+						skipUrl++;
 						continue;
 					} else {
-						final URL u;
-						try {
-							u = new URL(key);
-							UrlPage value = new UrlPage();
-							value.setParent(url);
-							value.setUrl(u);
-							value.setStatus(UrlPage.STATUS_NEW);
-							value.setLevel(level - 1);
-							
-							res.put(key, value);
+						UrlPage value = new UrlPage();
+						value.setRefer(url.toString());
+						String ustr = u.toString();
+						if(ustr.contains("#")) {
+							ustr = ustr.substring(0, ustr.indexOf("#"));
+						}
+						value.setUrl(ustr);
+						value.setStatus(UrlPage.STATUS_NEW);
+						value.setLevel(level - 1);
+						
+						res.put(key, value);
 							
 							// 3. 递归下载新页面
 //							pool.execute(new Runnable() {
@@ -156,13 +176,10 @@ public class DownloaderImpl implements Downloader {
 //									logger.trace("Type1426641219818.run end.");
 //								}
 //							});
-							
-						} catch (MalformedURLException e) {
-							// 出现不合法URL，自动跳过
-							logger.debug("下载模块解析页面URL时,出现不合法URL自动跳过" + key, e);
-						}
 					}
 				}
+				logger.info("urlCount:" + urlCount + "skipUrl:" + skipUrl + "path:" + path);
+				sumUrl = sumUrl + urlCount;
 				
 //				List<String> list = Arrays.asList(objs);
 				// 为了去除重复URL，不保证性能
@@ -170,10 +187,11 @@ public class DownloaderImpl implements Downloader {
 //				resources.addAll(list);
 				
 				// 标记为已分析完成
-				analyzed(url);
-				
-				return res;
+				markAnalyzed(url);
 			}
+			
+			logger.info("sumUrl:" + sumUrl);
+			return res;
 
 			// 3. 递归下载新页面
 //			downPage(url, url, level);
@@ -182,6 +200,9 @@ public class DownloaderImpl implements Downloader {
 			logger.error("DownloaderImpl.downPage XPatherException", e);
 		} catch (IOException e1) {
 			logger.error("DownloaderImpl.downPage IOException", e1);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.error("DownloaderImpl.downPage SQLException", e);
 		}
 		
 		return null;
@@ -190,8 +211,9 @@ public class DownloaderImpl implements Downloader {
 	/**
 	 * 标记为已分析完成
 	 * @param url 
+	 * @throws SQLException 
 	 */
-	private void analyzed(URL url) {
+	private void markAnalyzed(URL url) throws SQLException {
 		logger.trace("DownloaderImpl.analyzed start...");
 		
 		DownloadDao dao = new DownloadDaoImpl();
@@ -203,8 +225,9 @@ public class DownloaderImpl implements Downloader {
 	/**
 	 * 标记为开始分析网页内容，解析出更多需要的URL
 	 * @param url
+	 * @throws SQLException 
 	 */
-	private void analyzing(URL url) {
+	private void markAnalyzing(URL url) throws SQLException {
 		logger.trace("DownloaderImpl.analyzing start...");
 		
 		DownloadDao dao = new DownloadDaoImpl();
@@ -216,8 +239,9 @@ public class DownloaderImpl implements Downloader {
 	/**
 	 * 标记已下载
 	 * @param url 
+	 * @throws SQLException 
 	 */
-	private void fetched(URL url) {
+	private void markFetched(URL url) throws SQLException {
 		logger.trace("DownloaderImpl.fetched start...");
 		
 		DownloadDao dao = new DownloadDaoImpl();
@@ -227,16 +251,22 @@ public class DownloaderImpl implements Downloader {
 	}
 	
 
-	// 获取网络文件，转存到fileDes中，fileDes需要带文件后缀名
-	public void saveUrlFile(URL url, File fileDes) throws IOException {
-		logger.debug("begin saveUrlFile(String fileUrl, File fileDes)");
+	/**
+	 *  获取网络文件，转存到destFile中，destFile需要带文件后缀名
+	 * @param url 采集的网页
+	 * @param destFile 本地保存的文件
+	 * @throws IOException 
+	 */
+	public void saveUrlFile(URL url, File destFile) throws IOException {
+		logger.debug("begin saveUrlFile(String fileUrl, File destFile)");
 		
-		File pathFile = fileDes.getParentFile();
+		File pathFile = destFile.getParentFile();
 		
 		// 检查文件路径是否存在
 		pathFile.mkdirs();
-		File toFile = fileDes;
+		File toFile = destFile;
 		if (toFile.exists()) {
+			// TODO 文件已存在，是否重新下载
 			// throw new Exception("file exist");
 			return;
 		}
@@ -246,7 +276,12 @@ public class DownloaderImpl implements Downloader {
 		outImgStream.close();
 	}
 
-	// 获取链接地址文件的byte数据
+	/**
+	 *  获取链接地址文件的byte数据
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
 	public byte[] getUrlFileData(URL url) throws IOException  {
 		logger.debug("begin getUrlFileData(String fileUrl)");
 		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -281,13 +316,11 @@ public class DownloaderImpl implements Downloader {
 		if (f.isAbsolute()) {
 			logger.debug("本地暂存目录：\t" + localDir);
 		} else {
-			localDir = param.getBaseDir() + File.separatorChar + paramDir;
-			
-			f = new File(localDir);
+			f = new File(param.getBaseDir(), paramDir);
 			if(f.isAbsolute()) {
-				logger.debug("本地暂存目录：\t" + localDir);
+				logger.debug("本地暂存目录：\t" + f.getPath());
 			} else {
-				logger.warn("无法获取本地暂存目录：\t" + localDir);
+				logger.warn("无法获取本地暂存目录：\t" + f.getPath());
 			}
 		}
 		
@@ -301,11 +334,29 @@ public class DownloaderImpl implements Downloader {
 //		DBUtil.getInstance(dbdriver, dburl, dbusername, dbpassword);
 	}
 
-	public HashMap<String, UrlPage> downPage(String parent, String url) throws MalformedURLException {
+	public HashMap<String, UrlPage> downPage(String parent, String url) {
 		logger.trace("Downloader.downPage start...");
 		
 		// TODO Auto-generated method stub
-		return downPage(new URL(parent), new URL(url));
+		try {
+			return downPage(new URL(parent), new URL(url));
+		} catch (MalformedURLException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+		
+//		logger.trace("Downloader.downPage end.");
+	}
+	public HashMap<String, UrlPage> downPage(String parent, String url, final int level) {
+		logger.trace("Downloader.downPage start...");
+		
+		// TODO Auto-generated method stub
+		try {
+			return downPage(new URL(parent), new URL(url), level);
+		} catch (MalformedURLException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
 		
 //		logger.trace("Downloader.downPage end.");
 	}

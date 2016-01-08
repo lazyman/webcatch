@@ -1,6 +1,7 @@
 package cn.com.lazyhome.webcatch.fetch;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.logging.Log;
@@ -9,8 +10,8 @@ import org.apache.commons.logging.LogFactory;
 public class UrlPage {
 	private static Log logger = LogFactory.getLog(UrlPage.class);
 	
-	private URL parent;
-	private URL url;
+	private String refer;
+	private String url;
 	private int level;
 	private File localFile;
 	private String status;
@@ -32,16 +33,30 @@ public class UrlPage {
 	public static final String STATUS_ANALYZING = "ANALYZING";
 	public static final String STATUS_ANALYZED = "ANALYZED";
 	
-	public URL getParent() {
-		return parent;
+	
+	public UrlPage() {
+		super();
 	}
-	public void setParent(URL parent) {
-		this.parent = parent;
+
+
+	public UrlPage(String refer, String url, int level) {
+		super();
+		this.refer = refer;
+		this.url = url;
+		this.level = level;
 	}
-	public URL getUrl() {
+
+
+	public String getRefer() {
+		return refer;
+	}
+	public void setRefer(String parent) {
+		this.refer = parent;
+	}
+	public String getUrl() {
 		return url;
 	}
-	public void setUrl(URL url) {
+	public void setUrl(String url) {
 		this.url = url;
 	}
 	public int getLevel() {

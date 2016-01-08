@@ -28,7 +28,7 @@ public interface DownloadDao {
 	 * 将解析出来的 resource URL保存到数据库
 	 * @param resources
 	 */
-	void analyzed(HashMap<String, UrlPage> resources) throws SQLException;
+	void save(HashMap<String, UrlPage> resources) throws SQLException;
 
 	/**
 	 * 标记已下载

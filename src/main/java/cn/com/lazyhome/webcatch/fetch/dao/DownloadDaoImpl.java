@@ -1,11 +1,17 @@
 package cn.com.lazyhome.webcatch.fetch.dao;
 
 import java.net.URL;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Vector;
 
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,18 +38,42 @@ public class DownloadDaoImpl implements DownloadDao {
 //		logger.trace("DownloadDao.getDownloaderProfile end.");
 	}
 	
-	public List<UrlPage> getDownloaderProfile() {
+	public List<UrlPage> getDownloaderProfile() throws SQLException {
 		logger.trace("DownloadDao.getDownloaderProfile start...");
 		
-		// TODO Auto-generated method stub
 		// select * from profile where status = STATUS_DOWNLOADING
-		return null;
+		String sql = "select * from profile where status = ?";
+		
+		Connection conn = DBUtil.getInstance().getConnection();
+		
+		ResultSetHandler<List<UrlPage>> handler = new BeanListHandler<UrlPage>(UrlPage.class);
+		
+		QueryRunner run = new QueryRunner();
+		try{
+			List<UrlPage> pages = run.query(conn, sql, handler, UrlPage.STATUS_DOWNLOADING);
+
+		    return pages;
+		} finally {
+		    conn.close(); 
+		}
 		
 //		logger.trace("DownloadDao.getDownloaderProfile end.");
 	}
 
-	public void analyzed(HashMap<String, UrlPage> resources) {
+	public void save(HashMap<String, UrlPage> resources) throws SQLException {
 		logger.trace("DownloadDao.analyzed start...");
+		
+		Connection conn = DBUtil.getInstance().getConnection();
+		QueryRunner run = new QueryRunner( );
+		
+		Iterator<Entry<String, UrlPage>> i = resources.entrySet().iterator();
+		while(i.hasNext()) {
+			UrlPage url = i.next().getValue();
+			run.update(conn, "INSERT INTO profile (url, refer, status, level) VALUES (?,?,?,?)",
+					url.getUrl(), url.getRefer(), url.getStatus(), url.getLevel());
+		}
+		
+		conn.close();
 		
 		// TODO Auto-generated method stub
 		
@@ -55,11 +85,11 @@ public class DownloadDaoImpl implements DownloadDao {
 		
 		// update profile set status = UrlPage.STATUS_FETCHED where url.status = STATUS_DOWNLOADING
 
-		String sql = "update profile set status = ? where url.status = ?";
+		String sql = "update profile set status = ? where url=?";
 		
 		Vector<String> params = new Vector<String>();
 		params.add(UrlPage.STATUS_FETCHED);
-		params.add(UrlPage.STATUS_DOWNLOADING);
+		params.add(url.toString());
 		
 		DBUtil.getInstance().executeByStrParams(sql, params);
 		
@@ -72,11 +102,11 @@ public class DownloadDaoImpl implements DownloadDao {
 		
 		// update profile set status = UrlPage.STATUS_ANALYZING where url.status = STATUS_FETCHED
 
-		String sql = "update profile set status = ? where url.status = ?";
+		String sql = "update profile set status = ? where url = ?";
 		
 		Vector<String> params = new Vector<String>();
 		params.add(UrlPage.STATUS_ANALYZING);
-		params.add(UrlPage.STATUS_FETCHED);
+		params.add(url.toString());
 		
 		DBUtil.getInstance().executeByStrParams(sql, params);
 		
@@ -88,11 +118,11 @@ public class DownloadDaoImpl implements DownloadDao {
 		
 		// update profile set status = UrlPage.STATUS_ANALYZED where url.status = STATUS_ANALYZING
 
-		String sql = "update profile set status = ? where url.status = ?";
+		String sql = "update profile set status = ? where url = ?";
 		
 		Vector<String> params = new Vector<String>();
 		params.add(UrlPage.STATUS_ANALYZED);
-		params.add(UrlPage.STATUS_ANALYZING);
+		params.add(url.toString());
 		
 		DBUtil.getInstance().executeByStrParams(sql, params);
 		

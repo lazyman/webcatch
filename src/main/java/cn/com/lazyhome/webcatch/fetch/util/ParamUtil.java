@@ -75,10 +75,11 @@ public class ParamUtil {
 			String sql = "select * from params";
 			PreparedStatement prest = conn.prepareStatement(sql);
 			
+//			prest.execute();
 		} catch (IOException e) {
 			logger.error("加载配置参数失败", e);
 		} catch (SQLException e) {
-			logger.error("从数据库读取配置参数失败", e);
+			logger.error("从数据库读取配置参数失败" + e.getErrorCode() + "--" + e.getSQLState(), e);
 		}
 		
 		return fileConfig;
