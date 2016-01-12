@@ -7,7 +7,9 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -31,11 +33,15 @@ public class FetchMain {
 	private static String refer = "http://freebdsmsexvideos.net/category/all-bdsm/page/1";
 	private static int defaultLevel = 2;
 	
+	public final static int defaultThreadPoolSize = 10;
+	
 	public static void main(String[] args) {
 //		demo();
 //		start(args);
+		
 		try {
 			downloading();
+//			producerConsumerDownload();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.error(e.getMessage(), e);
@@ -54,6 +60,30 @@ public class FetchMain {
 		
 		downloader.downPage(refer, url);
 	}
+
+	/**
+	 * 使用生产者消费者模式下载抓取
+	 * @throws SQLException 
+	 */
+	private static void producerConsumerDownload() throws SQLException {
+		final Downloader downloader = new DownloaderImpl();
+		// 初始化数据库连接
+		downloader.initParam();
+		final DownloadDao downloadDao = new DownloadDaoImpl();
+		downloadDao.initURLstatus();
+		
+		// 定义共享队列
+		Queue<UrlPage> pages = new LinkedList<UrlPage>();
+		// 入口页面
+		UrlPage entryPage = new UrlPage(defaultUrl, refer, defaultLevel);
+		pages.add(entryPage);
+		
+		DownTask downTask = new DownTask(pages);
+		URLFetchTask fetchTask = new URLFetchTask(pages, entryPage);
+		new Thread(downTask).start();
+		new Thread(fetchTask).start();
+	}
+	
 	/**
 	 * 在数据库中将需要的记录标记为正在下载，并加载到resource中，线程池并发执行下载任务
 	 * @throws SQLException 
@@ -66,7 +96,7 @@ public class FetchMain {
 		downloader.initParam();
 		final DownloadDao downloadDao = new DownloadDaoImpl();
 
-		ExecutorService pool = Executors.newFixedThreadPool(1);
+		ExecutorService pool = Executors.newFixedThreadPool(defaultThreadPoolSize);
 
 		// 在数据库中将需要下载的记录标记为正在下载，并加载到profiles中
 		List<UrlPage> profiles = new ArrayList<UrlPage>();
@@ -74,6 +104,8 @@ public class FetchMain {
 		profiles.add(page);
 		
 		do {
+			
+		synchronized (profiles) {
 			
 			// 线程池并发执行下载任务
 			for(final UrlPage p : profiles) {
@@ -96,6 +128,8 @@ public class FetchMain {
 					}
 				});
 			}
+		}
+			
 			
 			try {
 				Thread.sleep(10000);
@@ -103,7 +137,10 @@ public class FetchMain {
 				logger.error(e.getMessage(), e);
 			}
 			
-			profiles = downloadDao.loadDownloaderProfile();
+			synchronized (profiles) {
+				profiles = downloadDao.loadDownloaderProfile();
+			}
+			
 			
 		} while(profiles.size() > 0);
 		

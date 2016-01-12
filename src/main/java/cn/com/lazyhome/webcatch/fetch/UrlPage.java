@@ -1,8 +1,6 @@
 package cn.com.lazyhome.webcatch.fetch;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +30,10 @@ public class UrlPage {
 	public static final String STATUS_FETCHED = "FETCHED";
 	public static final String STATUS_ANALYZING = "ANALYZING";
 	public static final String STATUS_ANALYZED = "ANALYZED";
+	
+	public static final String STATUS_UNANALYZED = "UNANALYZED";
+	public static final String STATUS_UNFETCHED = "UNFETCHED";
+	public static final String STATUS_UNKNOWN = "UNKNOWN";
 	
 	
 	public UrlPage() {

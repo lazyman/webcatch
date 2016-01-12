@@ -39,7 +39,7 @@ public class DownloaderImpl implements Downloader {
 	/**
 	 * 没有指定文件名时，给予的默认文件名
 	 */
-	public static final String DEFAULT_FILE_NAME = "_";
+	public static final String DEFAULT_FILE_NAME = "_.html";
 	
 	public static Properties config;
 	/**
@@ -58,6 +58,9 @@ public class DownloaderImpl implements Downloader {
 	}
 
 	public HashMap<String, UrlPage> downPage(URL parent, final URL url, final int level) {
+		// 使用map保证url不重复
+		HashMap<String, UrlPage> res = new HashMap<String, UrlPage>();
+		
 		if(logger.isDebugEnabled()) {
 			logger.debug("begin downPage(String parent, String url, int level)");
 			logger.debug(parent);
@@ -65,7 +68,7 @@ public class DownloaderImpl implements Downloader {
 			logger.debug(level);
 		}
 		
-		
+		DownloadDao downloadDao = new DownloadDaoImpl();
 		// 开启多线程下载模式
 		ExecutorService pool = Executors.newFixedThreadPool(3);
 		
@@ -106,23 +109,21 @@ public class DownloaderImpl implements Downloader {
 			
 			saveUrlFile(url, localFile);
 			// 标记已下载
-			markFetched(url);
+			downloadDao.markFetched(url.toString(), level);
 			
 			// 如果没有更多的下载层级要求，则不再下载，退出循环
 			if(level <= 0) {
-				return null;
+				return res;
 			}
 
 			// 标记为开始分析网页内容，解析出更多需要的URL
-			markAnalyzing(url);
+			downloadDao.markAnalyzing(url.toString(), level);
 			
 			// 2. 处理页面，提取需要下载的链接资源，把没主机的补上。
 			HtmlCleaner cleaner = new HtmlCleaner();
 			TagNode html = cleaner.clean(localFile);
 
 //			List<String> resources = new Vector<String>();
-			// 使用map保证url不重复
-			HashMap<String, UrlPage> res = new HashMap<String, UrlPage>();
 			
 			int urlCount=0;
 			int skipUrl=0;
@@ -187,67 +188,51 @@ public class DownloaderImpl implements Downloader {
 //				resources.addAll(list);
 				
 				// 标记为已分析完成
-				markAnalyzed(url);
+				downloadDao.markAnalyzed(url.toString(), level);
 			}
 			
 			logger.info("sumUrl:" + sumUrl);
-			return res;
 
 			// 3. 递归下载新页面
 //			downPage(url, url, level);
 
 		} catch (XPatherException e) {
-			logger.error("DownloaderImpl.downPage XPatherException", e);
+			logger.warn("DownloaderImpl.downPage XPatherException");
+			markStatus(url, level, UrlPage.STATUS_UNANALYZED);
 		} catch (IOException e1) {
-			logger.error("DownloaderImpl.downPage IOException", e1);
+			logger.warn("DownloaderImpl.downPage IOException");
+			markStatus(url, level, UrlPage.STATUS_UNFETCHED);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.error("DownloaderImpl.downPage SQLException", e);
+			
+			// 数据已抓取并分析，存入数据库时失败，结果没有保存，相当于白干
+			markStatus(url, level, UrlPage.STATUS_UNANALYZED);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error("DownloaderImpl.downPage other Exception", e);
+			markStatus(url, level, UrlPage.STATUS_UNKNOWN);
 		}
 		
-		return null;
+		return res;
 	}
 
 	/**
-	 * 标记为已分析完成
+	 * 标记处理状态
 	 * @param url 
 	 * @throws SQLException 
 	 */
-	private void markAnalyzed(URL url) throws SQLException {
-		logger.trace("DownloaderImpl.analyzed start...");
+	private void markStatus(URL url, int level, String status) {
+		logger.trace("DownloaderImpl.markStatus start...");
 		
 		DownloadDao dao = new DownloadDaoImpl();
-		dao.analyzed(url);
+		try {
+			dao.markStatus(url.toString(), level, status);
+		} catch(SQLException e) {
+			logger.error("DownloaderImpl.markStatus SQLException", e);
+		}
 		
-		logger.trace("DownloaderImpl.analyzed end.");
-	}
-
-	/**
-	 * 标记为开始分析网页内容，解析出更多需要的URL
-	 * @param url
-	 * @throws SQLException 
-	 */
-	private void markAnalyzing(URL url) throws SQLException {
-		logger.trace("DownloaderImpl.analyzing start...");
-		
-		DownloadDao dao = new DownloadDaoImpl();
-		dao.analyzing(url);
-		
-		logger.trace("DownloaderImpl.analyzing end.");
-	}
-
-	/**
-	 * 标记已下载
-	 * @param url 
-	 * @throws SQLException 
-	 */
-	private void markFetched(URL url) throws SQLException {
-		logger.trace("DownloaderImpl.fetched start...");
-		
-		DownloadDao dao = new DownloadDaoImpl();
-		dao.fetched(url);
-		
-		logger.trace("DownloaderImpl.fetched end.");
+		logger.trace("DownloaderImpl.markStatus end.");
 	}
 	
 
@@ -349,13 +334,21 @@ public class DownloaderImpl implements Downloader {
 	}
 	public HashMap<String, UrlPage> downPage(String parent, String url, final int level) {
 		logger.trace("Downloader.downPage start...");
+		HashMap<String, UrlPage> res = new HashMap<String, UrlPage>();
 		
 		// TODO Auto-generated method stub
 		try {
-			return downPage(new URL(parent), new URL(url), level);
+			if(parent == null) {
+				return downPage(null, new URL(url), level);
+			} else {
+				return downPage(new URL(parent), new URL(url), level);
+			}
 		} catch (MalformedURLException e) {
-			logger.error(e.getMessage(), e);
-			return null;
+			logger.warn("parent:" + parent);
+			logger.warn("url:" + url);
+			logger.warn("level:" + level);
+			
+			return res;
 		}
 		
 //		logger.trace("Downloader.downPage end.");

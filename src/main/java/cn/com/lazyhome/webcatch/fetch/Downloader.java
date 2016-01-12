@@ -3,7 +3,6 @@
  */
 package cn.com.lazyhome.webcatch.fetch;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
