@@ -1,6 +1,7 @@
 package cn.com.lazyhome.webcatch.fetch;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -13,27 +14,30 @@ import org.apache.commons.logging.LogFactory;
 public class URLFetchTask implements Runnable {
 	private static Log logger = LogFactory.getLog(URLFetchTask.class);
 	
-	private Queue<UrlPage> queue;
+	private Queue<UrlPage> taskQueue;
+	private LinkedList<UrlPage> finishedQueue;
 	
 	final Downloader downloader = new DownloaderImpl();
 	final DownloadDao downloadDao = new DownloadDaoImpl();
 	
-	public URLFetchTask(Queue<UrlPage> queue, UrlPage entryPage) {
+	public URLFetchTask(Queue<UrlPage> queue, UrlPage entryPage, LinkedList<UrlPage> finishedQueue) {
 		super();
-		this.queue = queue;
+		this.taskQueue = queue;
 		if(queue.isEmpty()) {
 			queue.add(entryPage);
 		}
+		
+		this.finishedQueue = finishedQueue;
 	}
 
 
 	public void run() {
 		while (true) {
-			synchronized (queue) {
-				while (queue.size() > 0) {
+			synchronized (taskQueue) {
+				while (!taskQueue.isEmpty()) {
 					try {
-						logger.info("Queue is not empty");
-						queue.wait();
+						logger.info("URLFetchTask Queue is not empty");
+						taskQueue.wait(1000);
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}
@@ -44,9 +48,9 @@ public class URLFetchTask implements Runnable {
 					List<UrlPage> profiles = downloadDao.loadDownloaderProfile();
 					logger.info("新增URL数量：" + profiles.size());
 					
-					queue.addAll(profiles);
+					taskQueue.addAll(profiles);
 					
-					queue.notify();
+					taskQueue.notify();
 				} catch (SQLException e) {
 					logger.error(e.getMessage(), e);
 				}

@@ -17,23 +17,50 @@ import cn.com.lazyhome.webcatch.fetch.dao.DownloadDaoImpl;
 public class DownTask implements Runnable {
 	private static Log logger = LogFactory.getLog(DownTask.class);
 	
-	private Queue<UrlPage> queue;
+	private Queue<UrlPage> taskQueue;
+	private Queue<UrlPage> finishedQueue;
+	
 	final Downloader downloader = new DownloaderImpl();
 	final DownloadDao downloadDao = new DownloadDaoImpl();
 	
 	ExecutorService pool = Executors.newFixedThreadPool(FetchMain.defaultThreadPoolSize);
 
-	public DownTask(Queue<UrlPage> queue) {
-		this.queue = queue;
+	public DownTask(Queue<UrlPage> taskQueue, LinkedList<UrlPage> finishedQueue) {
+		this.taskQueue = taskQueue;
+		this.finishedQueue = finishedQueue;
 	}
 	
 	public void run() {
+		run1();
+	}
+	public void run2() {
 		while (true) {
-			synchronized (queue) {
-				while (queue.isEmpty()) {
+			synchronized (taskQueue) {
+				while (taskQueue.isEmpty()) {
 					try {
-						System.out.println("Queue is empty");
-						queue.wait();
+						System.out.println("DownTask2 Queue is empty");
+						taskQueue.wait();
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+			
+				final UrlPage page = taskQueue.poll();
+				
+				down(page);
+				
+				taskQueue.notify();
+			}
+		}
+	}
+	
+	public void run1() {
+		while (true) {
+			synchronized (taskQueue) {
+				while (taskQueue.isEmpty()) {
+					try {
+						System.out.println("DownTask1 Queue is empty");
+						taskQueue.wait();
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}
@@ -41,12 +68,12 @@ public class DownTask implements Runnable {
 				
 				
 				// 开始取出URL，进行下载抓取
-				final Queue<UrlPage> finishedQueue = new LinkedList<UrlPage>();
-				final int size = queue.size();
+				final int size = taskQueue.size();
 				int i=0;
 				
-				while(!queue.isEmpty()) {
-					final UrlPage page = queue.poll();
+				finishedQueue.addAll(taskQueue);
+				while(!taskQueue.isEmpty()) {
+					final UrlPage page = taskQueue.poll();
 					i++;
 					
 					logger.info("url解析进度：" + i + "/" + size);
@@ -55,17 +82,43 @@ public class DownTask implements Runnable {
 						public void run() {
 							down(page);
 							
-							synchronized (finishedQueue) {
-								finishedQueue.add(page);
-								
-								if(finishedQueue.size() == size) {
-									finishedQueue.clear();
-									queue.notify();
-								}
-							}
+							finishedQueue.remove(page);
 						}
 					});
 				}
+				
+				while(!finishedQueue.isEmpty()) {
+					try {
+						int finishSize = finishedQueue.size();
+						logger.info("finishedQueue.size():" + finishSize + "taskQueue.size:" + size);
+						
+						if(finishSize<5) {
+							Iterator<UrlPage> iterator = finishedQueue.iterator();
+							while(iterator.hasNext()) {
+								UrlPage page = iterator.next();
+								logger.debug(page.getUrl());
+							}
+						}
+						
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+//				while(finishedQueue.size() < size) {
+//					try {
+//						logger.info("finishedQueue.size():" + finishedQueue.size() + "taskQueue.size:" + size);
+//						Thread.sleep(3000);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+				
+				finishedQueue.clear();
+				taskQueue.notify();
 			}
 		}
 	}

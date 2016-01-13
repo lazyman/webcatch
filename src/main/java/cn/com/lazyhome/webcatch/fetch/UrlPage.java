@@ -20,7 +20,7 @@ public class UrlPage {
 	 * DOWNLOADING - 正在等待下载
 	 * FETCHED - 已抓取
 	 * ANALYZING - 正在分析
-	 * ANALYZED - 已分析网页内容
+	 * ANALYZED - 已分析网页内容，最终结果状态，其他状态都是在程序执行过程中被终止导致
 	 */
 	public static final String STATUS_NEW = "NEW";
 	/**
@@ -31,8 +31,17 @@ public class UrlPage {
 	public static final String STATUS_ANALYZING = "ANALYZING";
 	public static final String STATUS_ANALYZED = "ANALYZED";
 	
+	/**
+	 * 解析出错，无法解析
+	 */
 	public static final String STATUS_UNANALYZED = "UNANALYZED";
+	/**
+	 * 抓取报错，无法获取文件
+	 */
 	public static final String STATUS_UNFETCHED = "UNFETCHED";
+	/**
+	 * 未知错误状态
+	 */
 	public static final String STATUS_UNKNOWN = "UNKNOWN";
 	
 	

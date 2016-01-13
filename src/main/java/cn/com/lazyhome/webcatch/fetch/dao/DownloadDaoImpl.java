@@ -23,17 +23,16 @@ public class DownloadDaoImpl implements DownloadDao {
 	public List<UrlPage> loadDownloaderProfile() throws SQLException {
 		logger.trace("DownloadDao.getDownloaderProfile start...");
 
-		Connection conn = DBUtil.getInstance().getConnection();
-		QueryRunner run = new QueryRunner( );
-		String sql = "update profile set status = ? where status = ?";
 		
 		List<UrlPage> pages = getDownloaderProfile();
 		// update profile set status = STATUS_DOWNLOADING where status = STATUS_NEW
-		
+
 		// 已经取出的URL置为下载中STATUS_DOWNLOADING
-		run.update(conn, sql, UrlPage.STATUS_DOWNLOADING, UrlPage.STATUS_NEW);
-		
-		conn.close();
+		Iterator<UrlPage> iterator = pages.iterator();
+		while(iterator.hasNext()) {
+			UrlPage page = iterator.next();
+			markDownloading(page.getUrl(), page.getLevel());
+		}
 		
 		
 		return pages;
@@ -184,7 +183,12 @@ public class DownloadDaoImpl implements DownloadDao {
 		String sql = "update profile set status = ? where status = ?";
 		
 		// 初始化，把所有上次未下载完成的URL全部置为新的URL
+		// ANALYZED - 已分析网页内容，最终结果状态，其他状态都是在程序执行过程中被终止导致。
+		// 设置NEW以重新开始
 		run.update(conn, sql, UrlPage.STATUS_NEW, UrlPage.STATUS_DOWNLOADING);
+		// 如果level==0，则只下载不做解析，因此FETCHED是最后状态
+//		run.update(conn, sql, UrlPage.STATUS_NEW, UrlPage.STATUS_FETCHED);
+		run.update(conn, sql, UrlPage.STATUS_NEW, UrlPage.STATUS_ANALYZING);
 		
 		conn.close();
 	}

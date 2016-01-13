@@ -108,11 +108,11 @@ public class DownloaderImpl implements Downloader {
 			localFile = new File(localDir, filename);
 			
 			saveUrlFile(url, localFile);
-			// 标记已下载
-			downloadDao.markFetched(url.toString(), level);
 			
 			// 如果没有更多的下载层级要求，则不再下载，退出循环
 			if(level <= 0) {
+				// 标记已下载
+				downloadDao.markFetched(url.toString(), level);
 				return res;
 			}
 
@@ -197,10 +197,14 @@ public class DownloaderImpl implements Downloader {
 //			downPage(url, url, level);
 
 		} catch (XPatherException e) {
-			logger.warn("DownloaderImpl.downPage XPatherException");
+			logger.warn("DownloaderImpl.downPage XPatherException" + e.getMessage());
+			logger.warn(level + "\t" + url.toString());
+			
 			markStatus(url, level, UrlPage.STATUS_UNANALYZED);
 		} catch (IOException e1) {
-			logger.warn("DownloaderImpl.downPage IOException");
+			logger.warn("DownloaderImpl.downPage IOException" + e1.getMessage());
+			logger.warn(level + "\t" + url.toString());
+			
 			markStatus(url, level, UrlPage.STATUS_UNFETCHED);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

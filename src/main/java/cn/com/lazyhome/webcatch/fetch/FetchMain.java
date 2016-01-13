@@ -31,17 +31,17 @@ public class FetchMain {
 	private static Log logger = LogFactory.getLog(FetchMain.class);
 	private static String defaultUrl = "http://freebdsmsexvideos.net/category/all-bdsm/page/1?jjj=1";
 	private static String refer = "http://freebdsmsexvideos.net/category/all-bdsm/page/1";
-	private static int defaultLevel = 2;
+	private static int defaultLevel = 3;
 	
-	public final static int defaultThreadPoolSize = 10;
+	public final static int defaultThreadPoolSize = 15;
 	
 	public static void main(String[] args) {
 //		demo();
 //		start(args);
 		
 		try {
-			downloading();
-//			producerConsumerDownload();
+//			downloading();
+			producerConsumerDownload();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.error(e.getMessage(), e);
@@ -74,14 +74,23 @@ public class FetchMain {
 		
 		// 定义共享队列
 		Queue<UrlPage> pages = new LinkedList<UrlPage>();
+		LinkedList<UrlPage> finishedQueue = new LinkedList<UrlPage>();
 		// 入口页面
 		UrlPage entryPage = new UrlPage(defaultUrl, refer, defaultLevel);
 		pages.add(entryPage);
 		
-		DownTask downTask = new DownTask(pages);
-		URLFetchTask fetchTask = new URLFetchTask(pages, entryPage);
-		new Thread(downTask).start();
+		URLFetchTask fetchTask = new URLFetchTask(pages, entryPage, finishedQueue);
 		new Thread(fetchTask).start();
+
+		DownTask downTask1 = new DownTask(pages, finishedQueue);
+		new Thread(downTask1).start();
+//		DownTask downTask2 = new DownTask(pages, finishedQueue);
+//		new Thread(downTask2).start();
+		
+//		for(int i=0; i<defaultThreadPoolSize; i++) {
+//			DownTask task = new DownTask(pages, finishedQueue);
+//			new Thread(task).start();
+//		}
 	}
 	
 	/**
